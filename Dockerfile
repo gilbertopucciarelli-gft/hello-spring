@@ -1,4 +1,11 @@
+FROM openjdk:11 AS base
+WORKDIR /opt/hello-spring
+COPY ./ ./
+CMD ./gradlew assemble
+
+# --- 
+
 FROM openjdk:11
 WORKDIR /opt/hello-spring
-COPY build/libs/demo-0.0.1-SNAPSHOT.jar ./
+COPY --from=base /opt/hello-spring/build/libs/demo-0.0.1-SNAPSHOT.jar ./
 CMD java -jar demo-0.0.1-SNAPSHOT.jar
