@@ -1,0 +1,7 @@
+.git
+.git*
+Dockerfile
+.dockerignore
+
+build/
+!build/libs/demo-0.0.1-SNAPSHOT.jar
