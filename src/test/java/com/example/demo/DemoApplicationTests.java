@@ -21,4 +21,18 @@ class DemoApplicationTests {
 		assertThat(restTemplate.getForObject("/", String.class))
 				.isEqualTo("This is the root path!");
 	}
+
+	@Test
+	void helloTestDefault(@Autowired TestRestTemplate restTemplate) {
+		String defaultValue = "World";
+		assertThat(restTemplate.getForObject("/hello", String.class))
+				.isEqualTo("Hello %s!", defaultValue);
+	}
+
+	@Test
+	void helloTestVariable(@Autowired TestRestTemplate restTemplate) {
+		String variableValue = "Gilberto";
+		assertThat(restTemplate.getForObject(String.format("/hello?name=%s", variableValue), String.class))
+				.isEqualTo("Hello %s!", variableValue);
+	}
 }
