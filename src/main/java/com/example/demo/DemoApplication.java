@@ -22,4 +22,10 @@ public class DemoApplication {
 	public String root() {
 		return String.format("This is the root path!");
 	}
+
+	@GetMapping("/add")
+	public String add(@RequestParam(value = "a", defaultValue = "1") Integer a,
+					  @RequestParam(value = "b", defaultValue = "2") Integer b) {
+		return String.format("The add of a and b is: %d", a+b);
+	}
 }

@@ -35,4 +35,11 @@ class DemoApplicationTests {
 		assertThat(restTemplate.getForObject(String.format("/hello?name=%s", variableValue), String.class))
 				.isEqualTo("Hello %s!", variableValue);
 	}
+
+	@Test
+	void addTest(@Autowired TestRestTemplate restTemplate) {
+		Integer a = 5, b = 5, add = a+b;
+		assertThat(restTemplate.getForObject(String.format("/add?a=%d&b=%d", a, b), String.class))
+				.isEqualTo(String.format("The add of a and b is: %d", add));
+	}
 }
