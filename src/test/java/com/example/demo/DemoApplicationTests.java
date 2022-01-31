@@ -1,45 +1,116 @@
 package com.example.demo;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.web.client.RestClientException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 class DemoApplicationTests {
 
+	@Autowired
+	TestRestTemplate restTemplate;
+
 	@Test
 	void contextLoads() {
 	}
-	
+
 	@Test
-	void rootTest(@Autowired TestRestTemplate restTemplate) {
+	void rootTest() {
 		assertThat(restTemplate.getForObject("/", String.class))
 				.isEqualTo("This is the root path!");
 	}
 
-	@Test
-	void helloTestDefault(@Autowired TestRestTemplate restTemplate) {
-		String defaultValue = "World";
-		assertThat(restTemplate.getForObject("/hello", String.class))
-				.isEqualTo("Hello %s!", defaultValue);
+	@ParameterizedTest
+	@ValueSource(strings = {"World", "Gilberto", "Gilberto%20Pucciarelli", "José%20Gregorio%20Hernández"})
+	void helloParameterizedTest(String name) {
+		assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
+				.isEqualTo("Hello "+name+"!");
+	}
+
+	@DisplayName("/hello - Test Multiple Inputs")
+	@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+	@CsvSource({
+			"a, 						  Hello a!",
+			"null, 						  Hello null!",
+			"'', 						  Hello World!",
+			"' ', 						  Hello  !",
+			"World, 					  Hello World!",
+			"Gilberto, 					  Hello Gilberto!",
+			"José Gregorio Hernández, 	  Hello José Gregorio Hernández!"
+
+	})
+	void helloParamsNamesCsv(String name, String expected) {
+		assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
+				.isEqualTo(expected);
+	}
+
+	public static int[][] dataSetForAdd() {
+		return new int[][] {
+				{0, 0, 0}, // Default Add Test
+				{1, 2, 3}, //Basic Add Test
+				{0, 10, 10}, // Zero Add Test
+				{10, -5, 5}, // Negative Integer Add Test
+				// {2.5F, 3.5F, 6} // Float Add Test
+		};
+	}
+
+	@ParameterizedTest
+	@MethodSource("dataSetForAdd")
+	void addParameterizedTest(int[] data) {
+		assertThat(restTemplate.getForObject("/add?a="+data[0]+"&b="+data[1], Integer.class))
+				.isEqualTo(data[2]);
+	}
+
+	@ParameterizedTest()
+	@CsvSource({
+			"0, 0,	   0",
+			"1, 2, 	   3",
+			"0, 10,    10",
+			"10, -5,   5",
+			"'', 10,   10",
+			"10, '',   10",
+			"2.5, 3.5, 6",
+	})
+	void addParamsCsv(String a, String b, String expected) {
+		assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, String.class))
+				.isEqualTo(expected);
 	}
 
 	@Test
-	void helloTestVariable(@Autowired TestRestTemplate restTemplate) {
-		String variableValue = "Gilberto";
-		assertThat(restTemplate.getForObject(String.format("/hello?name=%s", variableValue), String.class))
-				.isEqualTo("Hello %s!", variableValue);
+	void canAddExceptionJsonString() {
+		assertThat(restTemplate.getForObject("/add?a=string&b=1", String.class).indexOf("Bad Request"))
+				.isGreaterThan(-1);
 	}
 
 	@Test
-	void addTest(@Autowired TestRestTemplate restTemplate) {
-		Integer a = 5, b = 5, add = a+b;
-		assertThat(restTemplate.getForObject(String.format("/add?a=%d&b=%d", a, b), String.class))
-				.isEqualTo(String.format("The add of a and b is: %d", add));
+	void canAddFloat() {
+		assertThat(restTemplate.getForObject("/add?a=1.5&b=2", Float.class))
+				.isEqualTo(3.5f);
+	}
+
+	@Test
+	void canAddFloatException() {
+		Exception thrown = assertThrows(RestClientException.class, ()-> {
+				restTemplate.getForObject("/add?a=string&b=2", Float.class);
+		});
+	}
+
+	@Nested
+	class MultiplicationTests {
+
 	}
 }

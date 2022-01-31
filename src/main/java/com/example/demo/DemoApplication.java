@@ -20,12 +20,18 @@ public class DemoApplication {
 
 	@GetMapping("/")
 	public String root() {
-		return String.format("This is the root path!");
+		return "This is the root path!";
 	}
 
 	@GetMapping("/add")
-	public String add(@RequestParam(value = "a", defaultValue = "1") Integer a,
-					  @RequestParam(value = "b", defaultValue = "2") Integer b) {
-		return String.format("The add of a and b is: %d", a+b);
+	public Object add(@RequestParam(value = "a", defaultValue = "0") Float a,
+					  @RequestParam(value = "b", defaultValue = "0") Float b) {
+		float sum = a+b;
+		float decimals = sum - (int) sum;
+		if(decimals != 0){
+			return sum;
+		}
+
+		return Integer.valueOf((int) sum);
 	}
 }
