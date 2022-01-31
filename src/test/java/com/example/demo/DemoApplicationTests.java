@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -109,6 +108,44 @@ class DemoApplicationTests {
 	@Nested
 	class MultiplicationTests {
 
+		@ParameterizedTest
+		@CsvSource({
+				"0, 0, 0",       // Default Multiply Test
+				"5, 5, 25",      // Basic Multiply Test
+				"5, 0, 0",   	 // Zero Multiply Test
+				"0, 5, 0",       // Zero Multiply Test
+				"-10, -50, 500", // Negative Multiply Test
+				"10, -10, -100", // Negative Multiply Test
+				"'', 5, 0",		 // A is null Multiply Test
+				"5, '', 0",		 // B is null Multiply Test
+				"1.0, 1.0, 1",	 // Float Multiply Test
+				"1.5, 1.5, 2.25" // Float Multiply Test
+		})
+		void canMultiply(String a, String b, String expected) {
+			assertThat(restTemplate.getForObject("/multiply?a="+a+"&b="+b, String.class))
+					.isEqualTo(expected);
+		}
+
+		@Test
+		void canMultiplyExceptionJsonString() {
+			assertThat(restTemplate.getForObject("/multiply?a=string&b=1", String.class).indexOf("Bad Request"))
+					.isGreaterThan(-1);
+		}
+
+		@Test
+		void canMultiplyFloat() {
+			float a = 1.5f;
+			float b = 1.5f;
+			assertThat(restTemplate.getForObject("/multiply?a="+a+"&b="+b, Float.class))
+					.isEqualTo(a*b);
+		}
+
+		@Test
+		void canMultiplyFloatException() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
+				restTemplate.getForObject("/multiply?a=string&b=2", Float.class);
+			});
+		}
 	}
 
 	@Nested
@@ -117,6 +154,8 @@ class DemoApplicationTests {
 
 		@Autowired
 		private DemoApplication app;
+
+		// Addition Tests
 
 		@Test
 		void appCanAddReturnsInteger() {
@@ -130,6 +169,27 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanAddNull() {
+			Exception thrown = assertThrows(NullPointerException.class, ()-> {
+				Float ret = (Float) app.add(null, 2f);
+			});
+
+			assertTrue(thrown.toString().contains("NullPointerException"));
+		}
+
+		// Multiply Tests
+
+		@Test
+		void appCanMultiplyReturnsInteger() {
+			assertThat(app.multiply(1f, 2f)).isEqualTo(2);
+		}
+
+		@Test
+		void appCanMultiplyReturnsFloat() {
+			assertThat(app.multiply(1.5f, 1.5f)).isEqualTo(2.25f);
+		}
+
+		@Test
+		void appCanMultiplyNull() {
 			Exception thrown = assertThrows(NullPointerException.class, ()-> {
 				Float ret = (Float) app.add(null, 2f);
 			});
