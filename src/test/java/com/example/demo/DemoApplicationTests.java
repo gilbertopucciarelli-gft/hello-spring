@@ -28,85 +28,87 @@ class DemoApplicationTests {
 	void contextLoads() {
 	}
 
-	@Test
-	void rootTest() {
-		assertThat(restTemplate.getForObject("/", String.class))
-				.isEqualTo("This is the root path!");
+	@Nested
+	class RootTests {
+
+		@Test
+		void rootTest() {
+			assertThat(restTemplate.getForObject("/", String.class))
+					.isEqualTo("This is the root path!");
+		}
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {"World", "Gilberto", "Gilberto%20Pucciarelli", "José%20Gregorio%20Hernández"})
-	void helloParameterizedTest(String name) {
-		assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
-				.isEqualTo("Hello "+name+"!");
+	@Nested
+	class HelloTests {
+
+		@ParameterizedTest
+		@ValueSource(strings = {"World", "Gilberto", "Gilberto%20Pucciarelli", "José%20Gregorio%20Hernández"})
+		void helloParameterizedTest(String name) {
+			assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
+					.isEqualTo("Hello "+name+"!");
+		}
+
+		@DisplayName("/hello - Test Multiple Inputs")
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@CsvSource({
+				"a, 						  Hello a!",
+				"null, 						  Hello null!",
+				"'', 						  Hello World!",
+				"' ', 						  Hello  !",
+				"World, 					  Hello World!",
+				"Gilberto, 					  Hello Gilberto!",
+				"José Gregorio Hernández, 	  Hello José Gregorio Hernández!"
+
+		})
+		void helloParamsNamesCsv(String name, String expected) {
+			assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
+					.isEqualTo(expected);
+		}
 	}
 
-	@DisplayName("/hello - Test Multiple Inputs")
-	@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
-	@CsvSource({
-			"a, 						  Hello a!",
-			"null, 						  Hello null!",
-			"'', 						  Hello World!",
-			"' ', 						  Hello  !",
-			"World, 					  Hello World!",
-			"Gilberto, 					  Hello Gilberto!",
-			"José Gregorio Hernández, 	  Hello José Gregorio Hernández!"
+	@Nested
+	class AdditionTests {
 
-	})
-	void helloParamsNamesCsv(String name, String expected) {
-		assertThat(restTemplate.getForObject("/hello?name="+name, String.class))
-				.isEqualTo(expected);
-	}
+		@ParameterizedTest()
+		@CsvSource({
+				"0, 0,	   0",  // Default Add Test
+				"1, 2, 	   3",  // Basic Add Test
+				"0, 10,    10", // Zero Add Test
+				"10, -5,   5",  // Negative Integer Add Test
+				"'', 10,   10", // A is null Add Test
+				"10, '',   10", // B is null Add Test
+				"2.5, 3.5, 6",  // Float Add Test
+		})
+		void addParamsCsv(String a, String b, String expected) {
+			assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, String.class))
+					.isEqualTo(expected);
+		}
 
-	public static int[][] dataSetForAdd() {
-		return new int[][] {
-				{0, 0, 0}, // Default Add Test
-				{1, 2, 3}, //Basic Add Test
-				{0, 10, 10}, // Zero Add Test
-				{10, -5, 5}, // Negative Integer Add Test
-				// {2.5F, 3.5F, 6} // Float Add Test
-		};
-	}
+		@Test
+		void canAddExceptionJsonString() {
+			assertThat(restTemplate.getForObject("/add?a=string&b=1", String.class).indexOf("Bad Request"))
+					.isGreaterThan(-1);
+		}
 
-	@ParameterizedTest
-	@MethodSource("dataSetForAdd")
-	void addParameterizedTest(int[] data) {
-		assertThat(restTemplate.getForObject("/add?a="+data[0]+"&b="+data[1], Integer.class))
-				.isEqualTo(data[2]);
-	}
+		@Test
+		void canAddFloat() {
+			float a = 1.5f;
+			float b = 2f;
+			assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, Float.class))
+					.isEqualTo(a+b);
+		}
 
-	@ParameterizedTest()
-	@CsvSource({
-			"0, 0,	   0",
-			"1, 2, 	   3",
-			"0, 10,    10",
-			"10, -5,   5",
-			"'', 10,   10",
-			"10, '',   10",
-			"2.5, 3.5, 6",
-	})
-	void addParamsCsv(String a, String b, String expected) {
-		assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, String.class))
-				.isEqualTo(expected);
-	}
-
-	@Test
-	void canAddExceptionJsonString() {
-		assertThat(restTemplate.getForObject("/add?a=string&b=1", String.class).indexOf("Bad Request"))
-				.isGreaterThan(-1);
-	}
-
-	@Test
-	void canAddFloat() {
-		assertThat(restTemplate.getForObject("/add?a=1.5&b=2", Float.class))
-				.isEqualTo(3.5f);
-	}
-
-	@Test
-	void canAddFloatException() {
-		Exception thrown = assertThrows(RestClientException.class, ()-> {
+		@Test
+		void canAddFloatException() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
 				restTemplate.getForObject("/add?a=string&b=2", Float.class);
-		});
+			});
+		}
+	}
+
+	@Nested
+	class MultiplicationTests {
+
 	}
 
 	@Nested
@@ -134,10 +136,5 @@ class DemoApplicationTests {
 
 			assertTrue(thrown.toString().contains("NullPointerException"));
 		}
-	}
-
-	@Nested
-	class MultiplicationTests {
-
 	}
 }
