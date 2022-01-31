@@ -110,6 +110,33 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="Application tests")
+	class AppTests {
+
+		@Autowired
+		private DemoApplication app;
+
+		@Test
+		void appCanAddReturnsInteger() {
+			assertThat(app.add(1f, 2f)).isEqualTo(3);
+		}
+
+		@Test
+		void appCanAddReturnsFloat() {
+			assertThat(app.add(1.5f, 2f)).isEqualTo(3.5f);
+		}
+
+		@Test
+		void appCanAddNull() {
+			Exception thrown = assertThrows(NullPointerException.class, ()-> {
+				Float ret = (Float) app.add(null, 2f);
+			});
+
+			assertTrue(thrown.toString().contains("NullPointerException"));
+		}
+	}
+
+	@Nested
 	class MultiplicationTests {
 
 	}
