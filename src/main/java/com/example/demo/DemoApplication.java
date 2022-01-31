@@ -46,4 +46,22 @@ public class DemoApplication {
 
 		return (int) product;
 	}
+
+	@GetMapping("/subtraction")
+	public Object subtraction(@RequestParam(value = "a", defaultValue = "0") Float a,
+							  @RequestParam(value = "b", defaultValue = "0") Float b) {
+		float difference = a-b;
+		float decimals = difference - (int) difference;
+		if(decimals != 0){
+			return difference;
+		}
+
+		return (int) difference;
+	}
+
+	@GetMapping("/divide")
+	public Object divide(@RequestParam(value = "a", defaultValue = "0") Float a,
+						 @RequestParam(value = "b", defaultValue = "0") Float b) {
+		return a/b;
+	}
 }

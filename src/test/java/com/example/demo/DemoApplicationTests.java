@@ -28,6 +28,7 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="/root Path Tests")
 	class RootTests {
 
 		@Test
@@ -38,6 +39,7 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="/hello Path Tests")
 	class HelloTests {
 
 		@ParameterizedTest
@@ -66,9 +68,10 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="Addition Tests")
 	class AdditionTests {
 
-		@ParameterizedTest()
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
 		@CsvSource({
 				"0, 0,	   0",  // Default Add Test
 				"1, 2, 	   3",  // Basic Add Test
@@ -106,9 +109,10 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="Multiplication Tests")
 	class MultiplicationTests {
 
-		@ParameterizedTest
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
 		@CsvSource({
 				"0, 0, 0",       // Default Multiply Test
 				"5, 5, 25",      // Basic Multiply Test
@@ -149,7 +153,105 @@ class DemoApplicationTests {
 	}
 
 	@Nested
-	@DisplayName(value="Application tests")
+	@DisplayName(value="Subtraction Tests")
+	class SubtractionTests {
+
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@CsvSource({
+				"0, 0,	    0",   // Default Subtraction Test
+				"2, 1, 	    1",   // Basic Subtraction Test
+				"10, 0,     10",  // Zero Subtraction Test
+				"0, 10,    -10",  // Zero Subtraction Test
+				"'', 10,   -10",  // A is null Subtraction Test
+				"10, '',    10",  // B is null Subtraction Test
+				"-10, 5,   -15",  // A is Negative Subtraction Test
+				"5, -10,    15",  // B is Negative Subtraction Test
+				"-5, -5,     0",  // Both A&B Negative Subtraction Test
+				"5, 1.75,  3.25", // Float Subtraction Test
+				"2.5, -3.5,   6", // Float Negative Subtraction Test
+				"-2.5, 3.5,  -6", // Float Negative Subtraction Test
+		})
+		void subtractionParamsCsv(String a, String b, String expected) {
+			assertThat(restTemplate.getForObject("/subtraction?a="+a+"&b="+b, String.class))
+					.isEqualTo(expected);
+		}
+
+		@Test
+		void canSubtractionExceptionJsonString() {
+			assertThat(restTemplate.getForObject("/subtraction?a=string&b=1", String.class).indexOf("Bad Request"))
+					.isGreaterThan(-1);
+		}
+
+		@Test
+		void canSubtractionFloat() {
+			float a = 1.5f;
+			float b = 2f;
+			assertThat(restTemplate.getForObject("/subtraction?a="+a+"&b="+b, Float.class))
+					.isEqualTo(a-b);
+		}
+
+		@Test
+		void canSubtractionFloatException() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
+				restTemplate.getForObject("/subtraction?a=string&b=2", Float.class);
+			});
+		}
+	}
+
+	@Nested
+	// Fix typo in DisplayName
+	@DisplayName(value="Division Tests")
+	class DivisionTests {
+
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@CsvSource({
+				"2, 2, 1.0", // Same A&B Divide Test
+				"4, 2, 2.0", //
+				"1, 2, 0.5", // Float Result Divide Test
+				"-10, 5, -2.0", // A is Negative Divide Test
+				"20, -5, -4.0", // B is Negative Divide Test
+				"-10, -10, 1.0", // A&B is Negative Divide Test
+				"5, 2, 2.5", // Division is Float Test
+				"1.5, 2, 0.75", // Result is Float Test
+				// Both are Float Divide Test
+
+		})
+		void divideParamsCsv(String a, String b, String expected) {
+			assertThat(restTemplate.getForObject("/divide?a="+a+"&b="+b, String.class))
+					.isEqualTo(expected);
+		}
+
+		/*
+		@Test
+		void divideByZero(String a, String b, String expected) {
+
+		}
+		*/
+
+		@Test
+		void canDivideExceptionJsonString() {
+			assertThat(restTemplate.getForObject("/divide?a=string&b=1", String.class).indexOf("Bad Request"))
+					.isGreaterThan(-1);
+		}
+
+		@Test
+		void canDivideFloat() {
+			float a = 1.5f;
+			float b = 2f;
+			assertThat(restTemplate.getForObject("/divide?a="+a+"&b="+b, Float.class))
+					.isEqualTo(a/b);
+		}
+
+		@Test
+		void canDivideFloatException() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
+				restTemplate.getForObject("/divide?a=string&b=2", Float.class);
+			});
+		}
+	}
+
+	@Nested
+	@DisplayName(value="Application Tests")
 	class AppTests {
 
 		@Autowired
