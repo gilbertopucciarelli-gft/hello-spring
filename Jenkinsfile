@@ -2,22 +2,33 @@ pipeline {
     agent any
 
     stages {
+        stage('Test') {
+            sh './gradlew clean test'
+        }
+
+        post {
+            always {
+                junit 'build/test-results/test/*.xml'
+                jacoco execPattern: 'build/jacoco/*.exec'
+            }
+        }
+
         stage('Build') {
             steps {
-                // Get some code from a GitHub repository
-                git branch: 'main', url: 'https://github.com/gilbertopucciarelli-gft/hello_spring.git'
-
                 // Run Gradle Wrapper
-                sh './gradlew clean test assemble'
-
+                sh './gradlew assemble'
             }
 
             post {
                 success {
-                    junit 'build/test-results/test/*.xml'
                     archiveArtifacts 'build/libs/*.jar'
-                    jacoco execPattern: 'build/jacoco/*.exec'
                 }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
             }
         }
     }
