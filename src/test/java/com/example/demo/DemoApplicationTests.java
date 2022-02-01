@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.web.client.RestClientException;
 
+import java.math.BigDecimal;
+
+import static java.math.RoundingMode.HALF_DOWN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -205,15 +208,17 @@ class DemoApplicationTests {
 
 		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
 		@CsvSource({
-				"2, 2, 1.0", // Same A&B Divide Test
-				"4, 2, 2.0", //
-				"1, 2, 0.5", // Float Result Divide Test
-				"-10, 5, -2.0", // A is Negative Divide Test
-				"20, -5, -4.0", // B is Negative Divide Test
-				"-10, -10, 1.0", // A&B is Negative Divide Test
-				"5, 2, 2.5", // Division is Float Test
-				"1.5, 2, 0.75", // Result is Float Test
-				// Both are Float Divide Test
+				"2, 2,      1.00",  // Same A&B Divide Test
+				"4, 2,      2.00",  // Basic Divide Test
+				"1, 2,      0.50",  // Float Result Divide Test
+				"-10, 5,   -2.00",  // A is Negative Divide Test
+				"20, -5,   -4.00",  // B is Negative Divide Test
+				"-10, -10,  1.00",  // A&B is Negative Divide Test
+				"5, 2,      2.50",  // Result is Float Test
+				"1.5, 2,    0.75",  // A and Result are Float Test
+				"0, 10,     0.00",  // A is Zero Divide Test
+				"0.5, 0.5,  1.00",  // Both A&B are Float Divide Test
+				"0.5, 0.75, 0.67",  // Both A&B are Float Divide Test
 
 		})
 		void divideParamsCsv(String a, String b, String expected) {
@@ -221,12 +226,12 @@ class DemoApplicationTests {
 					.isEqualTo(expected);
 		}
 
-		/*
 		@Test
-		void divideByZero(String a, String b, String expected) {
-
+		void divideByZero() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
+				restTemplate.getForObject("/divide?a=10&b=0", Float.class);
+			});
 		}
-		*/
 
 		@Test
 		void canDivideExceptionJsonString() {
@@ -293,7 +298,53 @@ class DemoApplicationTests {
 		@Test
 		void appCanMultiplyNull() {
 			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				Float ret = (Float) app.add(null, 2f);
+				Float ret = (Float) app.multiply(null, 2f);
+			});
+
+			assertTrue(thrown.toString().contains("NullPointerException"));
+		}
+
+		// Subtraction Tests
+
+		@Test
+		void appCanSubtractReturnsInteger() {
+			assertThat(app.subtraction(2f, 1f)).isEqualTo(1);
+		}
+
+		@Test
+		void appCanSubtractReturnsFloat() {
+			assertThat(app.subtraction(2f, 1.5f)).isEqualTo(0.5f);
+		}
+
+		@Test
+		void appCanSubtractNull() {
+			Exception thrown = assertThrows(NullPointerException.class, ()-> {
+				Float ret = (Float) app.subtraction(null, 2f);
+			});
+
+			assertTrue(thrown.toString().contains("NullPointerException"));
+		}
+
+		// Division Tests
+
+		@Test
+		void appCanDivideReturnsInteger() {
+			BigDecimal a = new BigDecimal(4);
+			BigDecimal b = new BigDecimal(2);
+			assertThat(app.divide(a, b)).isEqualTo(a.divide(b, 2, HALF_DOWN));
+		}
+
+		@Test
+		void appCanDivideReturnsFloat() {
+			BigDecimal a = new BigDecimal(0.5);
+			BigDecimal b = new BigDecimal(0.75);
+			assertThat(app.divide(a, b)).isEqualTo(a.divide(b, 2, HALF_DOWN));
+		}
+
+		@Test
+		void appCanDivideNull() {
+			Exception thrown = assertThrows(NullPointerException.class, ()-> {
+				BigDecimal ret = app.divide(null, new BigDecimal(10));
 			});
 
 			assertTrue(thrown.toString().contains("NullPointerException"));

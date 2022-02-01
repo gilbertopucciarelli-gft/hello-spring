@@ -5,10 +5,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Generated;
+
+import java.math.BigDecimal;
+
+import static java.math.RoundingMode.HALF_DOWN;
+
 @SpringBootApplication
 @RestController
 public class DemoApplication {
 
+	@Generated(value="org.springframework.boot")
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
@@ -60,8 +67,8 @@ public class DemoApplication {
 	}
 
 	@GetMapping("/divide")
-	public Object divide(@RequestParam(value = "a", defaultValue = "0") Float a,
-						 @RequestParam(value = "b", defaultValue = "0") Float b) {
-		return a/b;
+	public BigDecimal divide(@RequestParam(value = "a", defaultValue = "0") BigDecimal a,
+							 @RequestParam(value = "b", defaultValue = "0") BigDecimal b) {
+		return a.divide(b, 2, HALF_DOWN);
 	}
 }
