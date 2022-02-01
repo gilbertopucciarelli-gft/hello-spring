@@ -3,13 +3,15 @@ pipeline {
 
     stages {
         stage('Test') {
-            sh './gradlew clean test'
-        }
+            steps {
+                sh './gradlew clean test'
+            }
 
-        post {
-            always {
-                junit 'build/test-results/test/*.xml'
-                jacoco execPattern: 'build/jacoco/*.exec'
+            post {
+                always {
+                    junit 'build/test-results/test/*.xml'
+                    jacoco execPattern: 'build/jacoco/*.exec'
+                }
             }
         }
 
