@@ -13,6 +13,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.web.client.RestClientException;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 import static java.math.RoundingMode.HALF_DOWN;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -256,6 +257,47 @@ class DemoApplicationTests {
 	}
 
 	@Nested
+	@DisplayName(value="Square Root Tests")
+	class SqrtTests {
+
+		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@CsvSource({
+				"0,       0", // Default sqrt Test
+				"4,       2", // Basic sqrt Test
+				"16,      4", // Basic sqrt Test
+				"36,      6", // Basic sqrt Test
+				"64,      8", // Basic sqrt Test
+				"100,    10", // Basic sqrt Test
+				"0.5, 0.707", // Float sqrt Test
+				"3.14, 1.77", // Float sqrt Test
+		})
+		void sqrtParamsCsv(String base, String expected) {
+			assertThat(restTemplate.getForObject("/sqrt?base="+base, String.class))
+					.isEqualTo(expected);
+		}
+
+		@Test
+		void sqrtNegativeBase() {
+			Exception thrown = assertThrows(RestClientException.class, () -> {
+				restTemplate.getForObject("/sqrt?base=-1", BigDecimal.class);
+			});
+		}
+
+		@Test
+		void canSqrtExceptionJsonString() {
+			assertThat(restTemplate.getForObject("/sqrt?base=string", String.class).indexOf("Bad Request"))
+					.isGreaterThan(-1);
+		}
+
+		@Test
+		void canSqrtFloat() {
+			float base = 0.5f;
+			assertThat(restTemplate.getForObject("/sqrt?base="+base, Float.class))
+					.isEqualTo(0.707f);
+		}
+	}
+
+	@Nested
 	@DisplayName(value="Application Tests")
 	class AppTests {
 
@@ -345,6 +387,29 @@ class DemoApplicationTests {
 		void appCanDivideNull() {
 			Exception thrown = assertThrows(NullPointerException.class, ()-> {
 				BigDecimal ret = app.divide(null, new BigDecimal(10));
+			});
+
+			assertTrue(thrown.toString().contains("NullPointerException"));
+		}
+
+		// Sqrt Tests
+
+		@Test
+		void appCanSqrtReturnsInteger() {
+			BigDecimal base = new BigDecimal(81);
+			assertThat(app.sqrt(base)).isEqualTo(base.sqrt(new MathContext(3, HALF_DOWN)));
+		}
+
+		@Test
+		void appCanSqrtReturnsFloat() {
+			BigDecimal base = new BigDecimal(11);
+			assertThat(app.sqrt(base)).isEqualTo(base.sqrt(new MathContext(3, HALF_DOWN)));
+		}
+
+		@Test
+		void appCanSqrtNull() {
+			Exception thrown = assertThrows(NullPointerException.class, ()-> {
+				BigDecimal ret = app.sqrt(null);
 			});
 
 			assertTrue(thrown.toString().contains("NullPointerException"));
