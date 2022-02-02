@@ -75,7 +75,7 @@ class DemoApplicationTests {
 	@DisplayName(value="Addition Tests")
 	class AdditionTests {
 
-		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@ParameterizedTest(name="[{index}] - \"{0}\" + \"{1}\" -> \"{2}\"")
 		@CsvSource({
 				"0, 0,	   0",  // Default Add Test
 				"1, 2, 	   3",  // Basic Add Test
@@ -106,9 +106,8 @@ class DemoApplicationTests {
 
 		@Test
 		void canAddFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/add?a=string&b=2", Float.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/add?a=string&b=2", Float.class));
 		}
 	}
 
@@ -116,7 +115,7 @@ class DemoApplicationTests {
 	@DisplayName(value="Multiplication Tests")
 	class MultiplicationTests {
 
-		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@ParameterizedTest(name="[{index}] - \"{0}\" * \"{1}\" -> \"{2}\"")
 		@CsvSource({
 				"0, 0, 0",       // Default Multiply Test
 				"5, 5, 25",      // Basic Multiply Test
@@ -150,9 +149,8 @@ class DemoApplicationTests {
 
 		@Test
 		void canMultiplyFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/multiply?a=string&b=2", Float.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/multiply?a=string&b=2", Float.class));
 		}
 	}
 
@@ -160,7 +158,7 @@ class DemoApplicationTests {
 	@DisplayName(value="Subtraction Tests")
 	class SubtractionTests {
 
-		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@ParameterizedTest(name="[{index}] - \"{0}\" - \"{1}\" -> \"{2}\"")
 		@CsvSource({
 				"0, 0,	    0",   // Default Subtraction Test
 				"2, 1, 	    1",   // Basic Subtraction Test
@@ -196,18 +194,16 @@ class DemoApplicationTests {
 
 		@Test
 		void canSubtractionFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/subtraction?a=string&b=2", Float.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/subtraction?a=string&b=2", Float.class));
 		}
 	}
 
 	@Nested
-	// Fix typo in DisplayName
 	@DisplayName(value="Division Tests")
 	class DivisionTests {
 
-		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@ParameterizedTest(name="[{index}] - \"{0}\" / \"{1}\" -> \"{2}\"")
 		@CsvSource({
 				"2, 2,      1.00",  // Same A&B Divide Test
 				"4, 2,      2.00",  // Basic Divide Test
@@ -229,9 +225,8 @@ class DemoApplicationTests {
 
 		@Test
 		void divideByZero() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/divide?a=10&b=0", Float.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/divide?a=10&b=0", Float.class));
 		}
 
 		@Test
@@ -250,9 +245,8 @@ class DemoApplicationTests {
 
 		@Test
 		void canDivideFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/divide?a=string&b=2", Float.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/divide?a=string&b=2", Float.class));
 		}
 	}
 
@@ -260,7 +254,7 @@ class DemoApplicationTests {
 	@DisplayName(value="Square Root Tests")
 	class SqrtTests {
 
-		@ParameterizedTest(name="[{index}] ({arguments}) \"{0}\" -> \"{1}\"")
+		@ParameterizedTest(name="[{index}] - \"{0}\" -> \"{1}\"")
 		@CsvSource({
 				"0,       0", // Default sqrt Test
 				"4,       2", // Basic sqrt Test
@@ -278,9 +272,8 @@ class DemoApplicationTests {
 
 		@Test
 		void sqrtNegativeBase() {
-			Exception thrown = assertThrows(RestClientException.class, () -> {
-				restTemplate.getForObject("/sqrt?base=-1", BigDecimal.class);
-			});
+			Exception thrown = assertThrows(RestClientException.class, () ->
+				restTemplate.getForObject("/sqrt?base=-1", BigDecimal.class));
 		}
 
 		@Test
@@ -378,8 +371,8 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanDivideReturnsFloat() {
-			BigDecimal a = new BigDecimal(0.5);
-			BigDecimal b = new BigDecimal(0.75);
+			BigDecimal a = new BigDecimal("0.5");
+			BigDecimal b = new BigDecimal("0.75");
 			assertThat(app.divide(a, b)).isEqualTo(a.divide(b, 2, HALF_DOWN));
 		}
 
