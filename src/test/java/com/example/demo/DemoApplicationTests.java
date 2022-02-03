@@ -24,8 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureWebTestClient
 class DemoApplicationTests {
 
+	public static final String PARAM_A = "a=";
+	public static final String PARAM_B = "&b=";
+	public static final String EXCEPTION_BAD_REQUEST = "Bad Request";
+	public static final String EXCEPTION_NULL_POINTER = "NullPointerException";
 	@Autowired
-	TestRestTemplate restTemplate;
+	transient TestRestTemplate restTemplate;
 
 	@Test
 	void contextLoads() {
@@ -86,13 +90,13 @@ class DemoApplicationTests {
 				"2.5, 3.5, 6",  // Float Add Test
 		})
 		void addParamsCsv(String a, String b, String expected) {
-			assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, String.class))
+			assertThat(restTemplate.getForObject("/add?" + PARAM_A +a+ PARAM_B +b, String.class))
 					.isEqualTo(expected);
 		}
 
 		@Test
 		void canAddExceptionJsonString() {
-			assertThat(restTemplate.getForObject("/add?a=string&b=1", String.class).indexOf("Bad Request"))
+			assertThat(restTemplate.getForObject("/add?" + PARAM_A + "string" + PARAM_B + "1", String.class).indexOf(EXCEPTION_BAD_REQUEST))
 					.isGreaterThan(-1);
 		}
 
@@ -100,14 +104,14 @@ class DemoApplicationTests {
 		void canAddFloat() {
 			float a = 1.5f;
 			float b = 2f;
-			assertThat(restTemplate.getForObject("/add?a="+a+"&b="+b, Float.class))
+			assertThat(restTemplate.getForObject("/add?" + PARAM_A +a+ PARAM_B +b, Float.class))
 					.isEqualTo(a+b);
 		}
 
 		@Test
 		void canAddFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/add?a=string&b=2", Float.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/add?" + PARAM_A + "string" + PARAM_B + "2", Float.class));
 		}
 	}
 
@@ -129,13 +133,13 @@ class DemoApplicationTests {
 				"1.5, 1.5, 2.25" // Float Multiply Test
 		})
 		void canMultiply(String a, String b, String expected) {
-			assertThat(restTemplate.getForObject("/multiply?a="+a+"&b="+b, String.class))
+			assertThat(restTemplate.getForObject("/multiply?" + PARAM_A +a+ PARAM_B +b, String.class))
 					.isEqualTo(expected);
 		}
 
 		@Test
 		void canMultiplyExceptionJsonString() {
-			assertThat(restTemplate.getForObject("/multiply?a=string&b=1", String.class).indexOf("Bad Request"))
+			assertThat(restTemplate.getForObject("/multiply?" + PARAM_A + "string" + PARAM_B + "1", String.class).indexOf(EXCEPTION_BAD_REQUEST))
 					.isGreaterThan(-1);
 		}
 
@@ -143,14 +147,14 @@ class DemoApplicationTests {
 		void canMultiplyFloat() {
 			float a = 1.5f;
 			float b = 1.5f;
-			assertThat(restTemplate.getForObject("/multiply?a="+a+"&b="+b, Float.class))
+			assertThat(restTemplate.getForObject("/multiply?" + PARAM_A +a+ PARAM_B +b, Float.class))
 					.isEqualTo(a*b);
 		}
 
 		@Test
 		void canMultiplyFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/multiply?a=string&b=2", Float.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/multiply?" + PARAM_A + "string" + PARAM_B + "2", Float.class));
 		}
 	}
 
@@ -174,13 +178,13 @@ class DemoApplicationTests {
 				"-2.5, 3.5,  -6", // Float Negative Subtraction Test
 		})
 		void subtractionParamsCsv(String a, String b, String expected) {
-			assertThat(restTemplate.getForObject("/subtraction?a="+a+"&b="+b, String.class))
+			assertThat(restTemplate.getForObject("/subtraction?" + PARAM_A +a+ PARAM_B +b, String.class))
 					.isEqualTo(expected);
 		}
 
 		@Test
 		void canSubtractionExceptionJsonString() {
-			assertThat(restTemplate.getForObject("/subtraction?a=string&b=1", String.class).indexOf("Bad Request"))
+			assertThat(restTemplate.getForObject("/subtraction?" + PARAM_A + "string" + PARAM_B + "1", String.class).indexOf(EXCEPTION_BAD_REQUEST))
 					.isGreaterThan(-1);
 		}
 
@@ -188,14 +192,14 @@ class DemoApplicationTests {
 		void canSubtractionFloat() {
 			float a = 1.5f;
 			float b = 2f;
-			assertThat(restTemplate.getForObject("/subtraction?a="+a+"&b="+b, Float.class))
+			assertThat(restTemplate.getForObject("/subtraction?" + PARAM_A +a+ PARAM_B +b, Float.class))
 					.isEqualTo(a-b);
 		}
 
 		@Test
 		void canSubtractionFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/subtraction?a=string&b=2", Float.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/subtraction?" + PARAM_A + "string" + PARAM_B + "2", Float.class));
 		}
 	}
 
@@ -219,19 +223,19 @@ class DemoApplicationTests {
 
 		})
 		void divideParamsCsv(String a, String b, String expected) {
-			assertThat(restTemplate.getForObject("/divide?a="+a+"&b="+b, String.class))
+			assertThat(restTemplate.getForObject("/divide?" + PARAM_A +a+ PARAM_B +b, String.class))
 					.isEqualTo(expected);
 		}
 
 		@Test
 		void divideByZero() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/divide?a=10&b=0", Float.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/divide?" + PARAM_A + "10" + PARAM_B + "0", Float.class));
 		}
 
 		@Test
 		void canDivideExceptionJsonString() {
-			assertThat(restTemplate.getForObject("/divide?a=string&b=1", String.class).indexOf("Bad Request"))
+			assertThat(restTemplate.getForObject("/divide?" + PARAM_A + "string" + PARAM_B + "1", String.class).indexOf(EXCEPTION_BAD_REQUEST))
 					.isGreaterThan(-1);
 		}
 
@@ -239,14 +243,14 @@ class DemoApplicationTests {
 		void canDivideFloat() {
 			float a = 1.5f;
 			float b = 2f;
-			assertThat(restTemplate.getForObject("/divide?a="+a+"&b="+b, Float.class))
+			assertThat(restTemplate.getForObject("/divide?" + PARAM_A +a+ PARAM_B +b, Float.class))
 					.isEqualTo(a/b);
 		}
 
 		@Test
 		void canDivideFloatException() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/divide?a=string&b=2", Float.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/divide?" + PARAM_A + "string" + PARAM_B + "2", Float.class));
 		}
 	}
 
@@ -272,13 +276,13 @@ class DemoApplicationTests {
 
 		@Test
 		void sqrtNegativeBase() {
-			Exception thrown = assertThrows(RestClientException.class, () ->
-				restTemplate.getForObject("/sqrt?base=-1", BigDecimal.class));
+			assertThrows(RestClientException.class, () ->
+					restTemplate.getForObject("/sqrt?base=-1", BigDecimal.class));
 		}
 
 		@Test
 		void canSqrtExceptionJsonString() {
-			assertThat(restTemplate.getForObject("/sqrt?base=string", String.class).indexOf("Bad Request"))
+			assertThat(restTemplate.getForObject("/sqrt?base=string", String.class).indexOf(EXCEPTION_BAD_REQUEST))
 					.isGreaterThan(-1);
 		}
 
@@ -295,7 +299,7 @@ class DemoApplicationTests {
 	class AppTests {
 
 		@Autowired
-		private DemoApplication app;
+		private transient DemoApplication app;
 
 		// Addition Tests
 
@@ -311,11 +315,9 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanAddNull() {
-			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				Float ret = (Float) app.add(null, 2f);
-			});
-
-			assertTrue(thrown.toString().contains("NullPointerException"));
+			Exception thrown = assertThrows(NullPointerException.class, ()->
+					app.add(null, 2f));
+			assertTrue(thrown.toString().contains(EXCEPTION_NULL_POINTER));
 		}
 
 		// Multiply Tests
@@ -332,11 +334,9 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanMultiplyNull() {
-			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				Float ret = (Float) app.multiply(null, 2f);
-			});
-
-			assertTrue(thrown.toString().contains("NullPointerException"));
+			Exception thrown = assertThrows(NullPointerException.class, ()->
+					app.multiply(null, 2f));
+			assertTrue(thrown.toString().contains(EXCEPTION_NULL_POINTER));
 		}
 
 		// Subtraction Tests
@@ -353,11 +353,9 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanSubtractNull() {
-			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				Float ret = (Float) app.subtraction(null, 2f);
-			});
-
-			assertTrue(thrown.toString().contains("NullPointerException"));
+			Exception thrown = assertThrows(NullPointerException.class, ()->
+					app.subtraction(null, 2f));
+			assertTrue(thrown.toString().contains(EXCEPTION_NULL_POINTER));
 		}
 
 		// Division Tests
@@ -378,11 +376,9 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanDivideNull() {
-			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				BigDecimal ret = app.divide(null, new BigDecimal(10));
-			});
-
-			assertTrue(thrown.toString().contains("NullPointerException"));
+			Exception thrown = assertThrows(NullPointerException.class, ()->
+					app.divide(null, new BigDecimal(10)));
+			assertTrue(thrown.toString().contains(EXCEPTION_NULL_POINTER));
 		}
 
 		// Sqrt Tests
@@ -401,11 +397,9 @@ class DemoApplicationTests {
 
 		@Test
 		void appCanSqrtNull() {
-			Exception thrown = assertThrows(NullPointerException.class, ()-> {
-				BigDecimal ret = app.sqrt(null);
-			});
-
-			assertTrue(thrown.toString().contains("NullPointerException"));
+			Exception thrown = assertThrows(NullPointerException.class, ()->
+					app.sqrt(null));
+			assertTrue(thrown.toString().contains(EXCEPTION_NULL_POINTER));
 		}
 	}
 }
